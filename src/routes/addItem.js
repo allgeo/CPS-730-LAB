@@ -7,7 +7,8 @@ module.exports = async (req, res) => {
         name: req.body.name,
         completed: false,
         priority: req.body.priority,
-        category: req.body.category
+        category: req.body.category,
+        due_date: req.body.due_date
     };
 
     await db.storeItem(item);
