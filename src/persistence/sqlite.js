@@ -70,8 +70,8 @@ async function getItem(id) {
 async function storeItem(item) {
     return new Promise((acc, rej) => {
         db.run(
-            'INSERT INTO todo_items (id, name, completed, priority) VALUES (?, ?, ?, ?)',
-            [item.id, item.name, item.completed ? 1 : 0, item.priority],
+            'INSERT INTO todo_items (id, name, completed, priority, category) VALUES (?, ?, ?, ?, ?)',
+            [item.id, item.name, item.completed ? 1 : 0, item.priority, item.category],
             err => {
                 if (err) return rej(err);
                 acc();
@@ -83,8 +83,8 @@ async function storeItem(item) {
 async function updateItem(id, item) {
     return new Promise((acc, rej) => {
         db.run(
-            'UPDATE todo_items SET name=?, completed=?, priority=? WHERE id = ?',
-            [item.name, item.completed ? 1 : 0, item.priority, id],
+            'UPDATE todo_items SET name=?, completed=?, priority=?, category=? WHERE id = ?',
+            [item.name, item.completed ? 1 : 0, item.priority, item.category, id],
             err => {
                 if (err) return rej(err);
                 acc();

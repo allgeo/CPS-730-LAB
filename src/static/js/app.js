@@ -191,7 +191,8 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
             body: JSON.stringify({
                 name: item.name,
                 completed: !item.completed,
-                priority: item.priority
+                priority: item.priority,
+                category: item.category
             }),
             headers: { 'Content-Type': 'application/json' },
         })
@@ -269,7 +270,9 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
             </Row>
             <Row>
                 <Col xs={12} className="category">
-                    Category: {item.category}
+                    <svg height="30" width="300">
+                        <text x="0" y="20">Category: {item.category}</text>
+                    </svg>
                 </Col>
             </Row>
         </Container>
