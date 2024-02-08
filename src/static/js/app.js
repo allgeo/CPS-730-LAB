@@ -170,32 +170,29 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                 <Col xs={5} className="name">
                     {item.name}
                 </Col>
-
-                {/* <Col xs={5} className="priority">
-                    {item.priority}
-                </Col> */}
+                
                 {/* The following lines define different display cases depending on the priority level chosen */}
                 {item.priority == 1 &&
-                    <Col xs={5} className="priority">
-                        Priority:
-                        <svg height="30" width="30">
-                            <circle r="5" cx="15" cy="15" fill="green" />
+                    <Col xs={5} className="text-center priority">
+                        <svg height="30" width="80">
+                            <text x="0" y="20">Priority:  </text>
+                            <circle r="5" cx="75" cy="15" fill="green" />
                         </svg>
                     </Col>
                 }
                 {item.priority == 2 &&
-                    <Col xs={5} className="priority">
-                        Priority:
-                        <svg height="30" width="30">
-                            <circle r="5" cx="15" cy="15" fill="goldenrod" />
+                    <Col xs={5} className="text-center priority">
+                        <svg height="30" width="80">
+                            <text x="0" y="20">Priority:  </text>
+                            <circle r="5" cx="75" cy="15" fill="goldenrod" />
                         </svg>
                     </Col>
                 }
                 {item.priority == 3 &&
-                    <Col xs={5} className="priority">
-                        Priority:
-                        <svg height="30" width="30">
-                            <circle r="5" cx="15" cy="15" fill="red" />
+                    <Col xs={5} className="text-center priority">
+                        <svg height="30" width="80">
+                            <text x="0" y="20">Priority:  </text>
+                            <circle r="5" cx="75" cy="15" fill="red" />
                         </svg>
                     </Col>
                 }
