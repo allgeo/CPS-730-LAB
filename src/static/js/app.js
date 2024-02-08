@@ -13,12 +13,26 @@ function App() {
 
 function TodoListCard() {
     const [items, setItems] = React.useState(null);
+    const [priorityFilter, setPriorityFilter] = React.useState(''); // Set default priority level filter to empty string (All)
+    const [categoryFilter, setCategoryFilter] = React.useState(''); // Set default category filter to empty string (All)
 
     React.useEffect(() => {
         fetch('/items')
             .then(r => r.json())
             .then(setItems);
     }, []);
+
+    const onPriorityFilterChange = React.useCallback(
+        event => {
+            setPriorityFilter(event.target.value);
+        }
+    );
+
+    const onCategoryFilterChange = React.useCallback(
+        event => {
+            setCategoryFilter(event.target.value);
+        }
+    );
 
     const onNewItem = React.useCallback(
         newItem => {
@@ -51,11 +65,22 @@ function TodoListCard() {
 
     return (
         <React.Fragment>
+            <PriorityFilterForm
+                priorityFilter={priorityFilter}
+                onPriorityFilterChange={onPriorityFilterChange}
+            />
+            <CategoryFilterForm
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={onCategoryFilterChange}
+            />
             <AddItemForm onNewItem={onNewItem} />
             {items.length === 0 && (
                 <p className="text-center">You have no todo items yet! Add one above!</p>
             )}
-            {items.map(item => (
+            {items.filter(item => 
+                (priorityFilter === '' || item.priority === priorityFilter) &&
+                (categoryFilter === '' || item.category === categoryFilter)
+            ).map(item => (
                 <ItemDisplay
                     item={item}
                     key={item.id}
@@ -67,19 +92,43 @@ function TodoListCard() {
     );
 }
 
+function PriorityFilterForm(props) {
+    return (
+        <div>
+            <label htmlFor="priorityFilter">Filter by Priority: </label>
+            <select id="priorityFilter" value={props.priorityFilter} onChange={props.onPriorityFilterChange}>
+                <option value="">All</option>
+                <option value="1">Low</option>
+                <option value="2">Medium</option>
+                <option value="3">High</option>
+            </select>
+        </div>
+    );
+}
+
+function CategoryFilterForm(props) {
+    return (
+        <div>
+            <label htmlFor="categoryFilter">Filter by Category: </label>
+            <input id="categoryFilter" value={props.categoryFilter} onChange={props.onCategoryFilterChange} />
+        </div>
+    );
+}
+
 function AddItemForm({ onNewItem }) {
     const { Form, InputGroup, Button } = ReactBootstrap;
 
     const [newItem, setNewItem] = React.useState('');
     const [selected, setSelected] = React.useState('1'); // Set default value for priority level as 1 (low)
     const [submitting, setSubmitting] = React.useState(false);
+    const [category, setCategory] = React.useState('');
 
     const submitNewItem = e => {
         e.preventDefault();
         setSubmitting(true);
         fetch('/items', {
             method: 'POST',
-            body: JSON.stringify({ name: newItem, priority: selected }), // Add priority level to JSON submission 
+            body: JSON.stringify({ name: newItem, priority: selected, category: category }), // Add priority level to JSON submission and including category
             headers: { 'Content-Type': 'application/json' },
         })
             .then(r => r.json())
@@ -87,12 +136,23 @@ function AddItemForm({ onNewItem }) {
                 onNewItem(item);
                 setSubmitting(false);
                 setNewItem('');
+                setCategory('');
             });
     };
 
     return (
         <Form onSubmit={submitNewItem}>
             <InputGroup className="mb-3">
+                <InputGroup.Prepend>
+                    <Form.Control
+                        value={category}
+                        onChange={e => setCategory(e.target.value)}
+                        type="text"
+                        placeholder="Category"
+                        aria-describedby="basic-addon1"
+                        className="mr-3"
+                    />
+                </InputGroup.Prepend>
                 <Form.Control
                     value={newItem}
                     onChange={e => setNewItem(e.target.value)}
@@ -196,7 +256,6 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                         </svg>
                     </Col>
                 }
-                
                 <Col xs={1} className="text-center remove">
                     <Button
                         size="sm"
@@ -206,6 +265,11 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                     >
                         <i className="fa fa-trash text-danger" />
                     </Button>
+                </Col>  
+            </Row>
+            <Row>
+                <Col xs={12} className="category">
+                    Category: {item.category}
                 </Col>
             </Row>
         </Container>
