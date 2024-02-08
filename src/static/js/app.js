@@ -73,13 +73,14 @@ function AddItemForm({ onNewItem }) {
     const [newItem, setNewItem] = React.useState('');
     const [selected, setSelected] = React.useState('1'); // Set default value for priority level as 1 (low)
     const [submitting, setSubmitting] = React.useState(false);
+    const [category, setCategory] = React.useState('');
 
     const submitNewItem = e => {
         e.preventDefault();
         setSubmitting(true);
         fetch('/items', {
             method: 'POST',
-            body: JSON.stringify({ name: newItem, priority: selected }), // Add priority level to JSON submission 
+            body: JSON.stringify({ name: newItem, priority: selected, category: category }), // Add priority level to JSON submission and including category
             headers: { 'Content-Type': 'application/json' },
         })
             .then(r => r.json())
@@ -87,12 +88,23 @@ function AddItemForm({ onNewItem }) {
                 onNewItem(item);
                 setSubmitting(false);
                 setNewItem('');
+                setCategory('');
             });
     };
 
     return (
         <Form onSubmit={submitNewItem}>
             <InputGroup className="mb-3">
+                <InputGroup.Prepend>
+                    <Form.Control
+                        value={category}
+                        onChange={e => setCategory(e.target.value)}
+                        type="text"
+                        placeholder="Category"
+                        aria-describedby="basic-addon1"
+                        className="mr-3"
+                    />
+                </InputGroup.Prepend>
                 <Form.Control
                     value={newItem}
                     onChange={e => setNewItem(e.target.value)}
@@ -199,7 +211,6 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                         </svg>
                     </Col>
                 }
-                
                 <Col xs={1} className="text-center remove">
                     <Button
                         size="sm"
@@ -209,6 +220,11 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                     >
                         <i className="fa fa-trash text-danger" />
                     </Button>
+                </Col>  
+            </Row>
+            <Row>
+                <Col xs={12} className="category">
+                    Category: {item.category}
                 </Col>
             </Row>
         </Container>
