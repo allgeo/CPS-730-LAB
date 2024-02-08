@@ -122,13 +122,14 @@ function AddItemForm({ onNewItem }) {
     const [selected, setSelected] = React.useState('1'); // Set default value for priority level as 1 (low)
     const [submitting, setSubmitting] = React.useState(false);
     const [category, setCategory] = React.useState('');
+    const [dueDate, setDueDate] = React.useState(''); 
 
     const submitNewItem = e => {
         e.preventDefault();
         setSubmitting(true);
         fetch('/items', {
             method: 'POST',
-            body: JSON.stringify({ name: newItem, priority: selected, category: category }), // Add priority level to JSON submission and including category
+            body: JSON.stringify({ name: newItem, priority: selected, category: category, due_date: dueDate }), // Add priority level to JSON submission and including category
             headers: { 'Content-Type': 'application/json' },
         })
             .then(r => r.json())
@@ -137,28 +138,30 @@ function AddItemForm({ onNewItem }) {
                 setSubmitting(false);
                 setNewItem('');
                 setCategory('');
+                setDueDate('');
             });
     };
 
     return (
         <Form onSubmit={submitNewItem}>
             <InputGroup className="mb-3">
-                <InputGroup.Prepend>
+                {/* <InputGroup.Prepend> */}
                     <Form.Control
                         value={category}
                         onChange={e => setCategory(e.target.value)}
                         type="text"
                         placeholder="Category"
                         aria-describedby="basic-addon1"
-                        className="mr-3"
+                        className="mr-1"
                     />
-                </InputGroup.Prepend>
+                {/* </InputGroup.Prepend> */}
                 <Form.Control
                     value={newItem}
                     onChange={e => setNewItem(e.target.value)}
                     type="text"
                     placeholder="New Item"
                     aria-describedby="basic-addon1"
+                    className="mr-1"
                 />
                 <InputGroup.Append>
                     <select onChange={event => setSelected(event.target.value)} autoFocus={true}> // Dropdown menu used to select priority level
@@ -167,6 +170,12 @@ function AddItemForm({ onNewItem }) {
                         <option value="3">High</option>
                     </select>
                 </InputGroup.Append> 
+                <Form.Control
+                    type="date"
+                    value={dueDate}
+                    onChange={e => setDueDate(e.target.value)}
+                    placeholder="Due Date"
+                />
                 <InputGroup.Append>
                     <Button
                         type="submit"
@@ -178,6 +187,7 @@ function AddItemForm({ onNewItem }) {
                     </Button>
                 </InputGroup.Append>
             </InputGroup>
+   
         </Form>
     );
 }
@@ -271,8 +281,11 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                 </Col>  
             </Row>
             <Row>
-                <Col xs={12} className="category">
+                <Col xs={12} className="category text-muted">
                     Category: {item.category}
+                </Col>
+                <Col xs={12} className="due-date text-muted">
+                    Due Date: {item.due_date}
                 </Col>
             </Row>
         </Container>
