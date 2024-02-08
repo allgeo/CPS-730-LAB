@@ -13,12 +13,26 @@ function App() {
 
 function TodoListCard() {
     const [items, setItems] = React.useState(null);
+    const [priorityFilter, setPriorityFilter] = React.useState(''); // Set default priority level filter to empty string (All)
+    const [categoryFilter, setCategoryFilter] = React.useState(''); // Set default category filter to empty string (All)
 
     React.useEffect(() => {
         fetch('/items')
             .then(r => r.json())
             .then(setItems);
     }, []);
+
+    const onPriorityFilterChange = React.useCallback(
+        event => {
+            setPriorityFilter(event.target.value);
+        }
+    );
+
+    const onCategoryFilterChange = React.useCallback(
+        event => {
+            setCategoryFilter(event.target.value);
+        }
+    );
 
     const onNewItem = React.useCallback(
         newItem => {
@@ -51,11 +65,22 @@ function TodoListCard() {
 
     return (
         <React.Fragment>
+            <PriorityFilterForm
+                priorityFilter={priorityFilter}
+                onPriorityFilterChange={onPriorityFilterChange}
+            />
+            <CategoryFilterForm
+                categoryFilter={categoryFilter}
+                onCategoryFilterChange={onCategoryFilterChange}
+            />
             <AddItemForm onNewItem={onNewItem} />
             {items.length === 0 && (
                 <p className="text-center">You have no todo items yet! Add one above!</p>
             )}
-            {items.map(item => (
+            {items.filter(item => 
+                (priorityFilter === '' || item.priority === priorityFilter) &&
+                (categoryFilter === '' || item.category === categoryFilter)
+            ).map(item => (
                 <ItemDisplay
                     item={item}
                     key={item.id}
@@ -64,6 +89,29 @@ function TodoListCard() {
                 />
             ))}
         </React.Fragment>
+    );
+}
+
+function PriorityFilterForm(props) {
+    return (
+        <div>
+            <label htmlFor="priorityFilter">Filter by Priority: </label>
+            <select id="priorityFilter" value={props.priorityFilter} onChange={props.onPriorityFilterChange}>
+                <option value="">All</option>
+                <option value="1">Low</option>
+                <option value="2">Medium</option>
+                <option value="3">High</option>
+            </select>
+        </div>
+    );
+}
+
+function CategoryFilterForm(props) {
+    return (
+        <div>
+            <label htmlFor="categoryFilter">Filter by Category: </label>
+            <input id="categoryFilter" value={props.categoryFilter} onChange={props.onCategoryFilterChange} />
+        </div>
     );
 }
 
