@@ -18,7 +18,7 @@ function init() {
                 console.log(`Using sqlite database at ${location}`);
 
             db.run(
-                'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), completed boolean, priority integer, category varchar(255))',
+                'CREATE TABLE IF NOT EXISTS todo_items (id varchar(36), name varchar(255), completed boolean, priority integer, due_date DATETIME, category varchar(255))',
                 (err, result) => {
                     if (err) return rej(err);
                     acc();
@@ -70,8 +70,8 @@ async function getItem(id) {
 async function storeItem(item) {
     return new Promise((acc, rej) => {
         db.run(
-            'INSERT INTO todo_items (id, name, completed, priority, category) VALUES (?, ?, ?, ?, ?)',
-            [item.id, item.name, item.completed ? 1 : 0, item.priority, item.category],
+            'INSERT INTO todo_items (id, name, completed, priority, due_date, category) VALUES (?, ?, ?, ?, ?, ?)',
+            [item.id, item.name, item.completed ? 1 : 0, item.priority, item.due_date, item.category],
             err => {
                 if (err) return rej(err);
                 acc();
@@ -83,8 +83,8 @@ async function storeItem(item) {
 async function updateItem(id, item) {
     return new Promise((acc, rej) => {
         db.run(
-            'UPDATE todo_items SET name=?, completed=?, priority=?, category=? WHERE id = ?',
-            [item.name, item.completed ? 1 : 0, item.priority, item.category, id],
+            'UPDATE todo_items SET name=?, completed=?, priority=?, due_date=?, category=? WHERE id = ?',
+            [item.name, item.completed ? 1 : 0, item.priority, item.due_date, item.category, id],
             err => {
                 if (err) return rej(err);
                 acc();
