@@ -37,3 +37,9 @@ body {
 button:focus {
     border: 1px solid #333;
 }
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
