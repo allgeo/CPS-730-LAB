@@ -145,7 +145,7 @@ function FilterForm(props) {
         props.setEndDate('');
     };
 
-    const checkIfFiltersSelected = () => {
+    const checkIfFiltersChanged = () => {
         return (
             priorityFilter !== props.priorityFilter ||
             categoryFilter !== props.categoryFilter ||
@@ -153,6 +153,15 @@ function FilterForm(props) {
             endDate !== props.endDate
         );
     };
+
+    function checkIfDefaultFilters() {
+        return (
+            props.priorityFilter !== 0 ||
+            props.categoryFilter !== '' ||
+            props.startDate !== '' ||
+            props.endDate !== ''
+        );
+    }
 
     return (
         <Form onSubmit={onApplyFilters}>
@@ -224,12 +233,11 @@ function FilterForm(props) {
                     <Button
                         type="submit"
                         className="mr-3"
-                        disabled={!checkIfFiltersSelected()}
+                        disabled={!checkIfFiltersChanged()}
                     >
                         Apply
                     </Button>
-                    {(props.priorityFilter !== 0 ||
-                        props.categoryFilter !== '') && (
+                    {checkIfDefaultFilters() && (
                         <Button
                             size="sm"
                             variant="link"
