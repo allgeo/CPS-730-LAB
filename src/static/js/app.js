@@ -256,12 +256,6 @@ function FilterForm(props) {
     );
 }
 
-// function SortForm() {
-//     const [nameSort, setNameSort] = React.useState('');
-//     const [prioritySort, setPrioritySort] = React.useState('');
-//     const [dueDateSort, setDueDateSort] = React.useState('');
-// }
-
 function AddItemForm({ onNewItem }) {
     const { Form, InputGroup, Button, OverlayTrigger, Tooltip } =
         ReactBootstrap;
