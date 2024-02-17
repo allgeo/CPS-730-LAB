@@ -1,28 +1,34 @@
-const PRIORITY_COLOURS = {  1: 'green',
-                            2: 'goldenrod',
-                            3: 'red'   };
+const PRIORITY_COLOURS = { 1: 'green', 2: 'goldenrod', 3: 'red' };
 
 function App() {
     const { Container, Row, Col } = ReactBootstrap;
 
     const [priorityFilter, setPriorityFilter] = React.useState(0);
     const [categoryFilter, setCategoryFilter] = React.useState('');
+    const [startDate, setStartDate] = React.useState('');
+    const [endDate, setEndDate] = React.useState('');
 
     return (
-        <Container fluid>      
+        <Container fluid>
             <Row>
                 <Col sm={{ offset: 1, span: 2 }}>
-                    <FilterForm 
-                        priorityFilter={priorityFilter} 
+                    <FilterForm
+                        priorityFilter={priorityFilter}
                         setPriorityFilter={setPriorityFilter}
                         categoryFilter={categoryFilter}
                         setCategoryFilter={setCategoryFilter}
+                        startDate={startDate}
+                        setStartDate={setStartDate}
+                        endDate={endDate}
+                        setEndDate={setEndDate}
                     />
                 </Col>
-                <Col sm={{ offset: 1, span: 5 }}>
-                    <TodoListCard 
+                <Col sm={{ offset: 1, span: 4 }}>
+                    <TodoListCard
                         priorityFilter={priorityFilter}
                         categoryFilter={categoryFilter}
+                        startDate={startDate}
+                        endDate={endDate}
                     />
                 </Col>
             </Row>
@@ -35,35 +41,38 @@ function TodoListCard(props) {
 
     React.useEffect(() => {
         fetch('/items')
-            .then(r => r.json())
+            .then((r) => r.json())
             .then(setItems);
     }, []);
 
     const onNewItem = React.useCallback(
-        newItem => {
+        (newItem) => {
             setItems([...items, newItem]);
         },
         [items],
     );
 
     const onItemUpdate = React.useCallback(
-        item => {
-            setItems(items.map(i => i.id === item.id ? item : i));
+        (item) => {
+            setItems(items.map((i) => (i.id === item.id ? item : i)));
         },
         [items],
     );
 
     const onItemRemoval = React.useCallback(
-        item => {
-            setItems(items.filter(i => i.id !== item.id));
+        (item) => {
+            setItems(items.filter((i) => i.id !== item.id));
         },
         [items],
     );
 
-    const applyFilters = (item) => 
-        (props.priorityFilter === 0 || item.priority === props.priorityFilter) &&
-        (props.categoryFilter === '' || item.category === props.categoryFilter);
-
+    const applyFilters = (item) =>
+        (props.priorityFilter === 0 ||
+            item.priority === props.priorityFilter) &&
+        (props.categoryFilter === '' ||
+            item.category === props.categoryFilter) &&
+        (props.startDate === '' || item.due_date >= props.startDate) &&
+        (props.endDate === '' || item.due_date <= props.endDate);
 
     if (items === null) return 'Loading...';
 
@@ -71,12 +80,20 @@ function TodoListCard(props) {
         <React.Fragment>
             <AddItemForm onNewItem={onNewItem} />
             {items.length === 0 && (
-                <p className="text-center">You have no todo items yet! Add one above!</p>
+                <div
+                    style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        height: '50vh',
+                    }}
+                >
+                    <h4 className="text-center text-muted">
+                        You have no todo items yet! Add one above!
+                    </h4>
+                </div>
             )}
-            {items
-                .filter(applyFilters)
-                .map(item => 
-            (
+            {items.filter(applyFilters).map((item) => (
                 <ItemDisplay
                     item={item}
                     key={item.id}
@@ -91,8 +108,14 @@ function TodoListCard(props) {
 function FilterForm(props) {
     const { Form, Button, Row, Col } = ReactBootstrap;
 
-    const [priorityFilter, setPriorityFilter] = React.useState(props.priorityFilter);
-    const [categoryFilter, setCategoryFilter] = React.useState(props.categoryFilter);
+    const [priorityFilter, setPriorityFilter] = React.useState(
+        props.priorityFilter,
+    );
+    const [categoryFilter, setCategoryFilter] = React.useState(
+        props.categoryFilter,
+    );
+    const [startDate, setStartDate] = React.useState(props.startDate);
+    const [endDate, setEndDate] = React.useState(props.endDate);
 
     const onPriorityFilterChange = (event) => {
         setPriorityFilter(parseInt(event.target.value, 10));
@@ -106,27 +129,45 @@ function FilterForm(props) {
         event.preventDefault();
         props.setPriorityFilter(priorityFilter);
         props.setCategoryFilter(categoryFilter);
+        props.setStartDate(startDate);
+        props.setEndDate(endDate);
     };
 
     const onClearFilters = (event) => {
         event.preventDefault();
         setPriorityFilter(0);
         setCategoryFilter('');
+        setStartDate('');
+        setEndDate('');
         props.setPriorityFilter(0);
         props.setCategoryFilter('');
-    }
+        props.setStartDate('');
+        props.setEndDate('');
+    };
 
     const checkIfFiltersSelected = () => {
-        return (priorityFilter !== props.priorityFilter || categoryFilter !== props.categoryFilter);
-    }
+        return (
+            priorityFilter !== props.priorityFilter ||
+            categoryFilter !== props.categoryFilter ||
+            startDate !== props.startDate ||
+            endDate !== props.endDate
+        );
+    };
 
     return (
         <Form onSubmit={onApplyFilters}>
             <h4>Filter By:</h4>
             <Form.Group as={Row}>
-                <Form.Label column sm="4" htmlFor="priorityFilter">Priority: </Form.Label>
+                <Form.Label column sm="4" htmlFor="priorityFilter">
+                    Priority:{' '}
+                </Form.Label>
                 <Col sm="8">
-                    <Form.Control as="select" id="priorityFilter" value={priorityFilter} onChange={onPriorityFilterChange}>
+                    <Form.Control
+                        as="select"
+                        id="priorityFilter"
+                        value={priorityFilter}
+                        onChange={onPriorityFilterChange}
+                    >
                         <option value={0}>All</option>
                         <option value={1}>Low</option>
                         <option value={2}>Medium</option>
@@ -135,29 +176,72 @@ function FilterForm(props) {
                 </Col>
             </Form.Group>
             <Form.Group as={Row}>
-                <Form.Label column sm="4" htmlFor="categoryFilter">Category: </Form.Label>
+                <Form.Label column sm="4" htmlFor="categoryFilter">
+                    Category:{' '}
+                </Form.Label>
                 <Col sm="8">
-                    <Form.Control 
-                        type="text" 
-                        id="categoryFilter" 
+                    <Form.Control
+                        type="text"
+                        id="categoryFilter"
                         value={categoryFilter}
-                        onChange={onCategoryFilterChange}>
-                    </Form.Control>
+                        onChange={onCategoryFilterChange}
+                    ></Form.Control>
                 </Col>
+            </Form.Group>
+            <Form.Group>
+                <Row>
+                    <Form.Label column sm="4" htmlFor="startDate">
+                        Start:{' '}
+                    </Form.Label>
+                    <Col sm="8">
+                        <Form.Control
+                            type="date"
+                            id="startDate"
+                            value={startDate}
+                            onChange={(e) => setStartDate(e.target.value)}
+                            max={endDate}
+                        ></Form.Control>
+                    </Col>
+                </Row>
+                <Row>
+                    <Form.Label column sm="4" htmlFor="endDate">
+                        End:{' '}
+                    </Form.Label>
+                    <Col sm="8">
+                        <Form.Control
+                            type="date"
+                            id="endDate"
+                            value={endDate}
+                            onChange={(e) => setEndDate(e.target.value)}
+                            disabled={!startDate}
+                            min={startDate}
+                        ></Form.Control>
+                    </Col>
+                </Row>
             </Form.Group>
             <Row>
                 <Col sm={{ offset: 4 }}>
-                    <Button type="submit" className="mr-3" disabled={!checkIfFiltersSelected()}>Apply</Button>
-                    {(props.priorityFilter !== 0 || props.categoryFilter !== '') &&
                     <Button
-                        size="sm"
-                        variant="link"
-                        onClick={onClearFilters}
-                        aria-label="Clear Filters"
+                        type="submit"
+                        className="mr-3"
+                        disabled={!checkIfFiltersSelected()}
+                    >
+                        Apply
+                    </Button>
+                    {(props.priorityFilter !== 0 ||
+                        props.categoryFilter !== '') && (
+                        <Button
+                            size="sm"
+                            variant="link"
+                            onClick={onClearFilters}
+                            aria-label="Clear Filters"
                         >
-                        
-                        <i className="fa fa-trash fa-lg" style={{ color: 'grey' }}/>
-                    </Button>}
+                            <i
+                                className="fas fa-trash-alt fa-lg"
+                                style={{ color: 'grey' }}
+                            />
+                        </Button>
+                    )}
                 </Col>
             </Row>
         </Form>
@@ -171,7 +255,8 @@ function FilterForm(props) {
 // }
 
 function AddItemForm({ onNewItem }) {
-    const { Form, InputGroup, Button, OverlayTrigger, Tooltip } = ReactBootstrap;
+    const { Form, InputGroup, Button, OverlayTrigger, Tooltip } =
+        ReactBootstrap;
 
     const [newItem, setNewItem] = React.useState('');
     const [priority, setPriority] = React.useState(1); // Set default value for priority level as 1 (low)
@@ -179,16 +264,21 @@ function AddItemForm({ onNewItem }) {
     const [category, setCategory] = React.useState('');
     const [dueDate, setDueDate] = React.useState('');
 
-    const submitNewItem = e => {
+    const submitNewItem = (e) => {
         e.preventDefault();
         setSubmitting(true);
         fetch('/items', {
             method: 'POST',
-            body: JSON.stringify({ name: newItem, priority: priority, category: category, due_date: dueDate }),
+            body: JSON.stringify({
+                name: newItem,
+                priority: priority,
+                category: category,
+                due_date: dueDate,
+            }),
             headers: { 'Content-Type': 'application/json' },
         })
-            .then(r => r.json())
-            .then(item => {
+            .then((r) => r.json())
+            .then((item) => {
                 onNewItem(item);
                 setSubmitting(false);
                 setNewItem('');
@@ -201,7 +291,7 @@ function AddItemForm({ onNewItem }) {
             <InputGroup className="mb-1">
                 <Form.Control
                     value={newItem}
-                    onChange={e => setNewItem(e.target.value)}
+                    onChange={(e) => setNewItem(e.target.value)}
                     type="text"
                     placeholder="New Item"
                     aria-describedby="basic-addon1"
@@ -211,19 +301,25 @@ function AddItemForm({ onNewItem }) {
             <InputGroup className="mb-3">
                 <Form.Control
                     value={category}
-                    onChange={e => setCategory(e.target.value)}
+                    onChange={(e) => setCategory(e.target.value)}
                     type="text"
                     placeholder="Category"
                     aria-describedby="basic-addon1"
                     className="mr-1"
                 ></Form.Control>
                 <OverlayTrigger
-                    overlay={<Tooltip id="tooltip-priority">Select the priority level</Tooltip>}
-                    >
+                    overlay={
+                        <Tooltip id="tooltip-priority">
+                            Select the priority level
+                        </Tooltip>
+                    }
+                >
                     <Form.Control
                         as="select"
                         value={priority}
-                        onChange={e => setPriority(parseInt(e.target.value, 10))}
+                        onChange={(e) =>
+                            setPriority(parseInt(e.target.value, 10))
+                        }
                         className="mr-1"
                     >
                         <option value={1}>Low</option>
@@ -231,13 +327,17 @@ function AddItemForm({ onNewItem }) {
                         <option value={3}>High</option>
                     </Form.Control>
                 </OverlayTrigger>
-                <OverlayTrigger 
-                    overlay={<Tooltip id="tooltip-due-date">Select the due date</Tooltip>}
-                    >
+                <OverlayTrigger
+                    overlay={
+                        <Tooltip id="tooltip-due-date">
+                            Select the due date
+                        </Tooltip>
+                    }
+                >
                     <Form.Control
                         type="date"
                         value={dueDate}
-                        onChange={e => setDueDate(e.target.value)}
+                        onChange={(e) => setDueDate(e.target.value)}
                         className="mr-1"
                         min={new Date().toISOString().split('T')[0]}
                     ></Form.Control>
@@ -256,7 +356,8 @@ function AddItemForm({ onNewItem }) {
 }
 
 function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
-    const { Container, Row, Col, Button, OverlayTrigger, Tooltip } = ReactBootstrap;
+    const { Container, Row, Col, Button, OverlayTrigger, Tooltip } =
+        ReactBootstrap;
 
     const calculateDays = (dueDate) => {
         const today = new Date();
@@ -264,7 +365,7 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
         const timeDiff = due.getTime() - today.getTime();
         const daysDiff = Math.ceil(timeDiff / (1000 * 3600 * 24));
         return daysDiff;
-    }
+    };
 
     const [days, setDays] = React.useState(calculateDays(item.due_date));
 
@@ -285,11 +386,11 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                 completed: !item.completed,
                 priority: item.priority,
                 category: item.category,
-                due_date: item.due_date
+                due_date: item.due_date,
             }),
             headers: { 'Content-Type': 'application/json' },
         })
-            .then(r => r.json())
+            .then((r) => r.json())
             .then(onItemUpdate);
     };
 
@@ -323,33 +424,45 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                 </Col>
                 <Col xs={5} className="name text-truncate">
                     <OverlayTrigger
-                        overlay={<Tooltip id={"tooltip-item-name"}>Item Name: {item.name}</Tooltip>}
-                        >
+                        overlay={
+                            <Tooltip id={'tooltip-item-name'}>
+                                Item Name: {item.name}
+                            </Tooltip>
+                        }
+                    >
                         <span>{item.name}</span>
                     </OverlayTrigger>
                 </Col>
                 <Col xs={5} className="category text-muted text-truncate">
                     <OverlayTrigger
-                        overlay={<Tooltip id={"tooltip-category"}>Category: {item.category}</Tooltip>}
-                        >
+                        overlay={
+                            <Tooltip id={'tooltip-category'}>
+                                Category: {item.category}
+                            </Tooltip>
+                        }
+                    >
                         <span>Category: {item.category}</span>
                     </OverlayTrigger>
                 </Col>
                 <Col xs={1} className="text-center remove">
                     <OverlayTrigger
-                        overlay={<Tooltip id={"tooltip-remove-item"}>Remove Item</Tooltip>}
-                        >
+                        overlay={
+                            <Tooltip id={'tooltip-remove-item'}>
+                                Remove Item
+                            </Tooltip>
+                        }
+                    >
                         <Button
                             size="sm"
                             variant="link"
                             onClick={removeItem}
                             aria-label="Remove Item"
                             className="mt-2"
-                            >
+                        >
                             <i className="fa fa-trash fa-lg text-danger" />
                         </Button>
                     </OverlayTrigger>
-                </Col> 
+                </Col>
             </Row>
             <Row>
                 <Col xs={6} className="due-date text-muted">
@@ -358,7 +471,12 @@ function ItemDisplay({ item, onItemUpdate, onItemRemoval }) {
                 <Col xs={6} className="priority text-muted">
                     Priority Level:
                     <svg height="30" width="30">
-                        <circle r="5" cx="15" cy="15" fill={PRIORITY_COLOURS[item.priority]} />
+                        <circle
+                            r="5"
+                            cx="15"
+                            cy="15"
+                            fill={PRIORITY_COLOURS[item.priority]}
+                        />
                     </svg>
                 </Col>
             </Row>

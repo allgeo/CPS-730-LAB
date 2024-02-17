@@ -13,6 +13,9 @@ dist/
 # Ignore logs and other generated files
 logs/
 *.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
 # Ignore environment specific files
 .env
@@ -22,3 +25,31 @@ logs/
 # Ignore OS generated files
 .DS_Store
 Thumbs.db
+
+# Ignore backup files
+*~
+*.swp
+*.bak
+*.backup
+*.orig
+
+# Ignore TypeScript helper files
+*.d.ts
+
+# Ignore yarn files
+yarn.lock
+.pnp.*
+.pnp.js
+
+# Ignore Visual Studio Code folder
+.vscode/
+
+# Ignore test coverage
+coverage/
+
+# Ignore production build files
+build/
+
+# Ignore next.js build directory
+.next/
+
