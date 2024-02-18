@@ -6,6 +6,14 @@ const addItem = require('./routes/addItem');
 const updateItem = require('./routes/updateItem');
 const deleteItem = require('./routes/deleteItem');
 
+// Logging to test load balancing
+app.use((req, res, next) => {
+    const now = new Date();
+    console.log(`[${now.toISOString()}] Process ID: ${process.pid} - Received request on ${req.method} ${req.path}`);
+    next(); 
+});
+
+
 app.use(express.json());
 app.use(express.static(__dirname + '/static'));
 
