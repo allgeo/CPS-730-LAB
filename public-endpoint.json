@@ -1,0 +1,4 @@
+{
+    "containerName": "cps730-nginx",
+    "containerPort": 80
+}
